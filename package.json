@@ -2,7 +2,7 @@
   "name": "stock-quantity-calculator",
   "version": "0.1.0",
   "private": true,
-  "homepage": "http://rakeshtembhurne.github.com/stock-quantity-calculator",
+  "homepage": "http://rakeshtembhurne.github.io/stock-quantity-calculator",
   "dependencies": {
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
