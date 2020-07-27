@@ -62,6 +62,7 @@ function App() {
         price: parseFloat(fields.entryPrice),
         quantity: quantity,
         stoploss: Math.abs((fields.entryPrice - fields.stopLoss)),
+        trigger_price: fields.stopLoss,
         readonly: true,
       }];
       setBasket(b);
