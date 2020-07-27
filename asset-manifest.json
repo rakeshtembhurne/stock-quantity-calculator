@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/stock-quantity-calculator/static/css/main.7a82dccc.chunk.css",
-    "main.js": "/stock-quantity-calculator/static/js/main.1a41ccce.chunk.js",
-    "main.js.map": "/stock-quantity-calculator/static/js/main.1a41ccce.chunk.js.map",
+    "main.js": "/stock-quantity-calculator/static/js/main.1e4fa6a6.chunk.js",
+    "main.js.map": "/stock-quantity-calculator/static/js/main.1e4fa6a6.chunk.js.map",
     "runtime-main.js": "/stock-quantity-calculator/static/js/runtime-main.5a53796b.js",
     "runtime-main.js.map": "/stock-quantity-calculator/static/js/runtime-main.5a53796b.js.map",
     "static/css/2.af3c1da9.chunk.css": "/stock-quantity-calculator/static/css/2.af3c1da9.chunk.css",
     "static/js/2.426a4d42.chunk.js": "/stock-quantity-calculator/static/js/2.426a4d42.chunk.js",
     "static/js/2.426a4d42.chunk.js.map": "/stock-quantity-calculator/static/js/2.426a4d42.chunk.js.map",
     "index.html": "/stock-quantity-calculator/index.html",
-    "precache-manifest.65274b2ac54caf788c06c9689b8d081c.js": "/stock-quantity-calculator/precache-manifest.65274b2ac54caf788c06c9689b8d081c.js",
+    "precache-manifest.e4bce176c276e9d6081b15def8ad6d7d.js": "/stock-quantity-calculator/precache-manifest.e4bce176c276e9d6081b15def8ad6d7d.js",
     "service-worker.js": "/stock-quantity-calculator/service-worker.js",
     "static/css/2.af3c1da9.chunk.css.map": "/stock-quantity-calculator/static/css/2.af3c1da9.chunk.css.map",
     "static/css/main.7a82dccc.chunk.css.map": "/stock-quantity-calculator/static/css/main.7a82dccc.chunk.css.map",
@@ -20,6 +20,6 @@
     "static/css/2.af3c1da9.chunk.css",
     "static/js/2.426a4d42.chunk.js",
     "static/css/main.7a82dccc.chunk.css",
-    "static/js/main.1a41ccce.chunk.js"
+    "static/js/main.1e4fa6a6.chunk.js"
   ]
 }
