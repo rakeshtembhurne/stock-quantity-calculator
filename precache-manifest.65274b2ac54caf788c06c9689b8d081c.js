@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "fd870eac7294a3cb69fce1a34e47cb00",
+    "revision": "f5d68640cefaa2b66aa0e07bbff6ebf1",
     "url": "/stock-quantity-calculator/index.html"
   },
   {
@@ -8,7 +8,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/stock-quantity-calculator/static/css/2.af3c1da9.chunk.css"
   },
   {
-    "revision": "b066d3455abafaa1e40e",
+    "revision": "ad5ffa33c968be866b00",
     "url": "/stock-quantity-calculator/static/css/main.7a82dccc.chunk.css"
   },
   {
@@ -20,8 +20,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/stock-quantity-calculator/static/js/2.426a4d42.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "b066d3455abafaa1e40e",
-    "url": "/stock-quantity-calculator/static/js/main.5a47c465.chunk.js"
+    "revision": "ad5ffa33c968be866b00",
+    "url": "/stock-quantity-calculator/static/js/main.1a41ccce.chunk.js"
   },
   {
     "revision": "f32061aaff5bde8a3fdc",

@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/stock-quantity-calculator/precache-manifest.b220e7f929e8253adf2d77f1d518d97e.js"
+  "/stock-quantity-calculator/precache-manifest.65274b2ac54caf788c06c9689b8d081c.js"
 );
 
 self.addEventListener('message', (event) => {
