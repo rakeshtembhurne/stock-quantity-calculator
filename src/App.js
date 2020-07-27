@@ -22,17 +22,20 @@ export function useFormFields(initialState) {
 function App() {
 
   const [quantity, setQuantity] = React.useState(0);
+  const [basket, setBasket] = React.useState([]);
 
   const [fields, handleFieldChange] = useFormFields({
     capital: 200000,
     entryPrice: 0,
     slPerTrade: 2,
     stopLoss: 0,
+    tradingSymbol: '',
   });
 
   function calculateQuantity(e) {
-    console.log("calculating");
-    e.preventDefault();
+    if (e) {
+      e.preventDefault();
+    }
 
     if (fields.capital && fields.entryPrice && fields.slPerTrade && fields.stopLoss) {
       const maxLoss = ((fields.capital * fields.slPerTrade) / 100);
@@ -42,6 +45,28 @@ function App() {
       setQuantity(quantity);
     }
   }
+
+  function onBuyIntraday(e) {
+    calculateQuantity();
+  }
+
+  React.useEffect(() => {
+    if (fields.tradingSymbol) {
+      const b = [{
+        variety: 'co',
+        tradingsymbol: fields.tradingSymbol,
+        exchange: 'NSE',
+        transaction_type: 'BUY',
+        order_type: 'LIMIT',
+        product: 'MIS',
+        price: parseFloat(fields.entryPrice),
+        quantity: quantity,
+        stoploss: Math.abs((fields.entryPrice - fields.stopLoss)),
+        readonly: true,
+      }];
+      setBasket(b);
+    }
+  }, [fields.tradingSymbol, fields.entryPrice, fields.stopLoss, quantity]);
 
   return (
     <Container className="App">
@@ -113,10 +138,47 @@ function App() {
           </Form.Group>
         </Form.Row>
 
+        <Form.Row>
+          <Form.Group as={Col}>
+            <Form.Label>Trading Symbol</Form.Label>
+            <Form.Control
+              placeholder="STOCKNAME"
+              size="lg"
+              autoFocus
+              autoComplete="off"
+              type="text"
+              id="tradingSymbol"
+              value={fields.tradingSymbol}
+              onChange={handleFieldChange}
+              required
+            />
+          </Form.Group>
+        </Form.Row>
+
         <Button size="lg" variant="primary" type="submit">
           Calculate Quantity
         </Button>
       </Form>
+
+      <br />
+      <form
+        method="post"
+        id="basket-form"
+        action="https://kite.zerodha.com/connect/basket"
+        onSubmit={onBuyIntraday}
+      >
+        <input type="hidden" name="api_key" value="59y2dm60w17qw3y4" />
+        <Form.Control
+          type="hidden"
+          id="basket"
+          name="data"
+          value={JSON.stringify(basket)}
+          required
+        />
+        <Button size="lg" variant="secondary" type="submit">
+          Buy Intraday
+        </Button>
+      </form>
     </Container>
   );
 }
