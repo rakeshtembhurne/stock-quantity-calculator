@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Form, Row, Col, Button, Container } from 'react-bootstrap';
@@ -21,15 +22,17 @@ export function useFormFields(initialState) {
 
 function App() {
 
+  const location = useLocation();
   const [quantity, setQuantity] = React.useState(0);
   const [basket, setBasket] = React.useState([]);
 
+  const searchParams = new URLSearchParams(location.search);
   const [fields, handleFieldChange] = useFormFields({
-    capital: 200000,
-    entryPrice: 0,
-    slPerTrade: 2,
-    stopLoss: 0,
-    tradingSymbol: '',
+    capital: searchParams.get("c") || 200000,
+    entryPrice: searchParams.get("e") || 0,
+    slPerTrade: searchParams.get("slpt") || 2,
+    stopLoss: searchParams.get("sl") || 0,
+    tradingSymbol: searchParams.get("n") || "",
   });
 
   function calculateQuantity(e) {
