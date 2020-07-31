@@ -25,6 +25,7 @@ function App() {
   const location = useLocation();
   const [quantity, setQuantity] = React.useState(0);
   const [basket, setBasket] = React.useState([]);
+  const [buyOrSell, setBuyOrSell] = React.useState('BUY');
 
   const searchParams = new URLSearchParams(location.search);
   const [fields, handleFieldChange] = useFormFields({
@@ -54,12 +55,15 @@ function App() {
   }
 
   React.useEffect(() => {
+    const bos = (fields.stopLoss < fields.entryPrice) ? 'BUY' : 'SELL';
+    setBuyOrSell(bos);
+
     if (fields.tradingSymbol) {
       const b = [{
         variety: 'co',
         tradingsymbol: fields.tradingSymbol,
         exchange: 'NSE',
-        transaction_type: 'BUY',
+        transaction_type: bos,
         order_type: 'LIMIT',
         product: 'MIS',
         price: parseFloat(fields.entryPrice),
@@ -70,7 +74,7 @@ function App() {
       }];
       setBasket(b);
     }
-  }, [fields.tradingSymbol, fields.entryPrice, fields.stopLoss, quantity]);
+  }, [fields.tradingSymbol, fields.entryPrice, fields.stopLoss, quantity, fields.capital, fields.slPerTrade]);
 
   return (
     <Container className="App">
@@ -179,8 +183,8 @@ function App() {
           value={JSON.stringify(basket)}
           required
         />
-        <Button size="lg" variant="secondary" type="submit">
-          Buy Intraday
+        <Button size="lg" variant={buyOrSell === 'BUY' ? 'success' : 'danger'} type="submit">
+          {buyOrSell} Intraday CO
         </Button>
       </form>
     </Container>
