@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Form, Row, Col, Button, Container } from 'react-bootstrap';
+import { Form, Row, Col, Button, Container, Badge } from 'react-bootstrap';
 
 export function useFormFields(initialState) {
   const [fields, setValues] = React.useState(initialState);
@@ -24,7 +24,9 @@ function App() {
 
   const location = useLocation();
   const [quantity, setQuantity] = React.useState(0);
-  const [basket, setBasket] = React.useState([]);
+  const [maximumLoss, setMaximumLoss] = React.useState(0);
+  const [coBasket, setCoBasket] = React.useState([]);
+  const [boBasket, setBoBasket] = React.useState([]);
   const [buyOrSell, setBuyOrSell] = React.useState('BUY');
 
   const searchParams = new URLSearchParams(location.search);
@@ -47,6 +49,7 @@ function App() {
       const quantity =  Math.round(maxLoss / stopLoss);
       console.log({maxLoss, stopLoss, quantity});
       setQuantity(quantity);
+      setMaximumLoss(maxLoss);
     }
   }
 
@@ -54,12 +57,34 @@ function App() {
     calculateQuantity();
   }
 
+  function getTrailingSl(ltp) {
+    if (ltp < 100) {
+      return 1;
+    } else if (ltp < 200) {
+      return 1.5;
+    } else if (ltp < 400) {
+      return 2;
+    } else if (ltp < 600) {
+      return 2.5;
+    } else if (ltp < 800) {
+      return 3;
+    } else if (ltp < 1000) {
+      return 4;
+    } else {
+      return 5;
+    }
+  }
+
   React.useEffect(() => {
     const bos = (fields.stopLoss < fields.entryPrice) ? 'BUY' : 'SELL';
     setBuyOrSell(bos);
+    calculateQuantity();
 
     if (fields.tradingSymbol) {
-      const b = [{
+      const stoploss = Math.abs((fields.entryPrice - fields.stopLoss));
+      const squareoff = Number(stoploss * 1.5).toFixed(1);
+
+      const co = [{
         variety: 'co',
         tradingsymbol: fields.tradingSymbol,
         exchange: 'NSE',
@@ -68,11 +93,29 @@ function App() {
         product: 'MIS',
         price: parseFloat(fields.entryPrice),
         quantity: quantity,
-        stoploss: Math.abs((fields.entryPrice - fields.stopLoss)),
+        stoploss: stoploss,
         trigger_price: parseFloat(fields.stopLoss),
         readonly: true,
       }];
-      setBasket(b);
+      setCoBasket(co);
+
+      const bo = [{
+        tradingsymbol: fields.tradingSymbol,
+        exchange: 'NSE',
+        transaction_type: bos,
+        order_type: 'LIMIT',
+        product: 'MIS',
+        price: parseFloat(fields.entryPrice),
+        quantity: quantity,
+        variety: 'bo',
+        stoploss: stoploss,
+        squareoff: parseFloat(squareoff),
+        trailing_stoploss: getTrailingSl(fields.entryPrice),
+        trigger_price: parseFloat(fields.stopLoss),
+        readonly: true,
+      }];
+      setBoBasket(bo);
+      console.log({co, bo});
     }
   }, [fields.tradingSymbol, fields.entryPrice, fields.stopLoss, quantity, fields.capital, fields.slPerTrade]);
 
@@ -80,6 +123,9 @@ function App() {
     <Container className="App">
       <Row className="quantity-container">
         <Col>{quantity}</Col>
+      </Row>
+      <Row className="risk-container">
+        <Col className="text-center"><Badge variant="danger">{maximumLoss}</Badge></Col>
       </Row>
       <Form onSubmit={calculateQuantity}>
         <Form.Row>
@@ -171,20 +217,41 @@ function App() {
       <br />
       <form
         method="post"
-        id="basket-form"
+        id="coBasket-form"
         action="https://kite.zerodha.com/connect/basket"
         onSubmit={onBuyIntraday}
+        className="mr-3 mb-3"
       >
         <input type="hidden" name="api_key" value="59y2dm60w17qw3y4" />
         <Form.Control
           type="hidden"
-          id="basket"
+          id="coBasket"
           name="data"
-          value={JSON.stringify(basket)}
+          value={JSON.stringify(coBasket)}
           required
         />
         <Button size="lg" variant={buyOrSell === 'BUY' ? 'success' : 'danger'} type="submit">
           {buyOrSell} Intraday CO
+        </Button>
+      </form>
+
+      <form
+        method="post"
+        id="boBasket-form"
+        action="https://kite.zerodha.com/connect/basket"
+        onSubmit={onBuyIntraday}
+        className="mr-3 mb-3"
+      >
+        <input type="hidden" name="api_key" value="59y2dm60w17qw3y4" />
+        <Form.Control
+          type="hidden"
+          id="boBasket"
+          name="data"
+          value={JSON.stringify(boBasket)}
+          required
+        />
+        <Button size="lg" variant={buyOrSell === 'BUY' ? 'success' : 'danger'} type="submit">
+          {buyOrSell} Intraday Bracket Order
         </Button>
       </form>
     </Container>
