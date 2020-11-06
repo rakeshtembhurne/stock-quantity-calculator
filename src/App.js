@@ -31,11 +31,11 @@ function App() {
 
   const searchParams = new URLSearchParams(location.search);
   const [fields, handleFieldChange] = useFormFields({
-    capital: searchParams.get("c") || 200000,
-    entryPrice: searchParams.get("e") || 0,
-    slPerTrade: searchParams.get("slpt") || 2,
-    stopLoss: searchParams.get("sl") || 0,
-    tradingSymbol: searchParams.get("n") || "",
+    capital: searchParams.get("c") || localStorage.getItem("capital") || 200000,
+    entryPrice: searchParams.get("e") || localStorage.getItem("entryPrice") || 0,
+    slPerTrade: searchParams.get("slpt") || localStorage.getItem("slPerTrade") || 2,
+    stopLoss: searchParams.get("sl") || localStorage.getItem("stopLoss") || 0,
+    tradingSymbol: searchParams.get("n") || localStorage.getItem("tradingSymbol") || "",
   });
 
   function calculateQuantity(e) {
@@ -55,6 +55,12 @@ function App() {
 
   function onBuyIntraday(e) {
     calculateQuantity();
+    // TODO: save data to local storage
+    localStorage.setItem('capital', fields.capital);
+    localStorage.setItem('entryPrice', fields.entryPrice);
+    localStorage.setItem('slPerTrade', fields.slPerTrade);
+    localStorage.setItem('stopLoss', fields.stopLoss);
+    localStorage.setItem('tradingSymbol', fields.tradingSymbol);
   }
 
   function getTrailingSl(ltp) {
@@ -240,7 +246,7 @@ function App() {
         id="boBasket-form"
         action="https://kite.zerodha.com/connect/basket"
         onSubmit={onBuyIntraday}
-        className="mr-3 mb-3"
+        className="mr-3 mb-3 d-none"
       >
         <input type="hidden" name="api_key" value="59y2dm60w17qw3y4" />
         <Form.Control
