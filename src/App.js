@@ -150,7 +150,9 @@ function App() {
           quantity: quantity,
           trigger_price: parseFloat(fields.stopLoss),
         },
-        {
+      ];
+      if (fields.targetPrice > 0) {
+        mo.push({
           exchange: 'NSE',
           tradingsymbol: fields.tradingSymbol,
           quantity: quantity,
@@ -159,13 +161,13 @@ function App() {
           order_type: "LIMIT",
           price: parseFloat(fields.targetPrice),
           trigger_price: parseFloat(fields.targetPrice),
-        },
-      ];
+        });
+      }
       setMoBasket(mo);
 
       console.log({co, bo, mo});
     }
-  }, [fields.tradingSymbol, fields.entryPrice, fields.stopLoss, quantity, fields.capital, fields.slPerTrade]);
+  }, [fields.tradingSymbol, fields.entryPrice, fields.stopLoss, quantity, fields.capital, fields.slPerTrade, fields.targetPrice]);
 
   return (
     <Container className="App">
