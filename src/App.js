@@ -25,14 +25,17 @@ function App() {
   const location = useLocation();
   const [quantity, setQuantity] = React.useState(0);
   const [maximumLoss, setMaximumLoss] = React.useState(0);
+  const [targetPrice, setTargetPrice] = React.useState(0);
   const [coBasket, setCoBasket] = React.useState([]);
   const [boBasket, setBoBasket] = React.useState([]);
+  const [moBasket, setMoBasket] = React.useState([]);
   const [buyOrSell, setBuyOrSell] = React.useState('BUY');
 
   const searchParams = new URLSearchParams(location.search);
   const [fields, handleFieldChange] = useFormFields({
     capital: searchParams.get("c") || localStorage.getItem("capital") || 200000,
     entryPrice: searchParams.get("e") || localStorage.getItem("entryPrice") || 0,
+    targetPrice: searchParams.get("t") || localStorage.getItem("targetPrice") || 0,
     slPerTrade: searchParams.get("slpt") || localStorage.getItem("slPerTrade") || 2,
     stopLoss: searchParams.get("sl") || localStorage.getItem("stopLoss") || 0,
     tradingSymbol: searchParams.get("n") || localStorage.getItem("tradingSymbol") || "",
@@ -46,10 +49,12 @@ function App() {
     if (fields.capital && fields.entryPrice && fields.slPerTrade && fields.stopLoss) {
       const maxLoss = ((fields.capital * fields.slPerTrade) / 100);
       const stopLoss = Math.abs((fields.entryPrice - fields.stopLoss));
+      const target = fields.targetPrice ? Math.abs((fields.targetPrice - fields.entryPrice)) : 0;
       const quantity =  Math.round(maxLoss / stopLoss);
       console.log({maxLoss, stopLoss, quantity});
       setQuantity(quantity);
       setMaximumLoss(maxLoss);
+      setTargetPrice(target);
     }
   }
 
@@ -58,6 +63,7 @@ function App() {
     // TODO: save data to local storage
     localStorage.setItem('capital', fields.capital);
     localStorage.setItem('entryPrice', fields.entryPrice);
+    localStorage.setItem('targetPrice', fields.targetPrice);
     localStorage.setItem('slPerTrade', fields.slPerTrade);
     localStorage.setItem('stopLoss', fields.stopLoss);
     localStorage.setItem('tradingSymbol', fields.tradingSymbol);
@@ -83,6 +89,8 @@ function App() {
 
   React.useEffect(() => {
     const bos = (fields.stopLoss < fields.entryPrice) ? 'BUY' : 'SELL';
+    const sob = bos === 'BUY' ? 'SELL' : 'BUY';
+
     setBuyOrSell(bos);
     calculateQuantity();
 
@@ -121,7 +129,41 @@ function App() {
         readonly: true,
       }];
       setBoBasket(bo);
-      console.log({co, bo});
+
+      const mo = [
+        {
+          exchange: 'NSE',
+          tradingsymbol: fields.tradingSymbol,
+          quantity: quantity,
+          transaction_type: bos,
+          product: 'MIS',
+          order_type: "LIMIT",
+          price: parseFloat(fields.entryPrice),
+        },
+        {
+          tradingsymbol: fields.tradingSymbol,
+          exchange: 'NSE',
+          transaction_type: sob,
+          order_type: 'SL-M',
+          product: 'MIS',
+          price: parseFloat(fields.stopLoss),
+          quantity: quantity,
+          trigger_price: parseFloat(fields.stopLoss),
+        },
+        {
+          exchange: 'NSE',
+          tradingsymbol: fields.tradingSymbol,
+          quantity: quantity,
+          transaction_type: sob,
+          product: 'MIS',
+          order_type: "LIMIT",
+          price: parseFloat(fields.targetPrice),
+          trigger_price: parseFloat(fields.targetPrice),
+        },
+      ];
+      setMoBasket(mo);
+
+      console.log({co, bo, mo});
     }
   }, [fields.tradingSymbol, fields.entryPrice, fields.stopLoss, quantity, fields.capital, fields.slPerTrade]);
 
@@ -168,21 +210,6 @@ function App() {
 
         <Form.Row>
           <Form.Group as={Col}>
-            <Form.Label>Entry Price</Form.Label>
-            <Form.Control
-              placeholder="Entry Price"
-              size="lg"
-              autoFocus
-              autoComplete="off"
-              type="number"
-              id="entryPrice"
-              value={fields.entryPrice}
-              onChange={handleFieldChange}
-              required
-            />
-          </Form.Group>
-
-          <Form.Group as={Col}>
             <Form.Label>Stop Loss</Form.Label>
             <Form.Control
               placeholder="Capital"
@@ -196,9 +223,40 @@ function App() {
               required
             />
           </Form.Group>
+
+          <Form.Group as={Col}>
+            <Form.Label>Entry Price</Form.Label>
+            <Form.Control
+              placeholder="Entry Price"
+              size="lg"
+              autoFocus
+              autoComplete="off"
+              type="number"
+              id="entryPrice"
+              value={fields.entryPrice}
+              onChange={handleFieldChange}
+              required
+            />
+          </Form.Group>
         </Form.Row>
 
         <Form.Row>
+
+        <Form.Group as={Col}>
+            <Form.Label>Target</Form.Label>
+            <Form.Control
+              placeholder="Target Price"
+              size="lg"
+              autoFocus
+              autoComplete="off"
+              type="number"
+              id="targetPrice"
+              value={fields.targetPrice}
+              onChange={handleFieldChange}
+              required
+            />
+          </Form.Group>
+
           <Form.Group as={Col}>
             <Form.Label>Trading Symbol</Form.Label>
             <Form.Control
@@ -226,7 +284,7 @@ function App() {
         id="coBasket-form"
         action="https://kite.zerodha.com/connect/basket"
         onSubmit={onBuyIntraday}
-        className="mr-3 mb-3"
+        className="mr-3 mb-3 d-inline"
       >
         <input type="hidden" name="api_key" value="59y2dm60w17qw3y4" />
         <Form.Control
@@ -246,7 +304,7 @@ function App() {
         id="boBasket-form"
         action="https://kite.zerodha.com/connect/basket"
         onSubmit={onBuyIntraday}
-        className="mr-3 mb-3 d-none"
+        className="mr-3 mb-3 d-inline"
       >
         <input type="hidden" name="api_key" value="59y2dm60w17qw3y4" />
         <Form.Control
@@ -258,6 +316,26 @@ function App() {
         />
         <Button size="lg" variant={buyOrSell === 'BUY' ? 'success' : 'danger'} type="submit">
           {buyOrSell} Intraday Bracket Order
+        </Button>
+      </form>
+
+      <form
+        method="post"
+        id="moBasket-form"
+        action="https://kite.zerodha.com/connect/basket"
+        onSubmit={onBuyIntraday}
+        className="mr-3 mb-3 d-inline"
+      >
+        <input type="hidden" name="api_key" value="59y2dm60w17qw3y4" />
+        <Form.Control
+          type="hidden"
+          id="moBasket"
+          name="data"
+          value={JSON.stringify(moBasket)}
+          required
+        />
+        <Button size="lg" variant={buyOrSell === 'BUY' ? 'success' : 'danger'} type="submit">
+          {buyOrSell} Market Order
         </Button>
       </form>
     </Container>
