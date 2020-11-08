@@ -28,6 +28,8 @@ function App() {
   const [coBasket, setCoBasket] = React.useState([]);
   const [boBasket, setBoBasket] = React.useState([]);
   const [buyOrSell, setBuyOrSell] = React.useState('BUY');
+  const [kiteCoverOrder, setKiteCoverOrder] = React.useState(null);
+  const [kiteMarketOrder, setKiteMarketOrder] = React.useState(null);
 
   const searchParams = new URLSearchParams(location.search);
   const [fields, handleFieldChange] = useFormFields({
@@ -51,16 +53,19 @@ function App() {
       setQuantity(quantity);
       setMaximumLoss(maxLoss);
     }
+
+    // setCoBasket(coBasket);
   }
 
   function onBuyIntraday(e) {
     calculateQuantity();
-    // TODO: save data to local storage
     localStorage.setItem('capital', fields.capital);
     localStorage.setItem('entryPrice', fields.entryPrice);
     localStorage.setItem('slPerTrade', fields.slPerTrade);
     localStorage.setItem('stopLoss', fields.stopLoss);
     localStorage.setItem('tradingSymbol', fields.tradingSymbol);
+
+    // e.preventDefault();
   }
 
   function getTrailingSl(ltp) {
@@ -104,6 +109,10 @@ function App() {
         readonly: true,
       }];
       setCoBasket(co);
+      // console.log({kiteCoverOrder});
+      // if (kiteCoverOrder) {
+      //   co.forEach(order => kiteCoverOrder.add(order));
+      // }
 
       const bo = [{
         tradingsymbol: fields.tradingSymbol,
@@ -121,9 +130,105 @@ function App() {
         readonly: true,
       }];
       setBoBasket(bo);
+      console.log({kiteMarketOrder});
+      if (window.KiteConnect) {
+        window.KiteConnect.ready(function() {
+          const kco = new window.KiteConnect("59y2dm60w17qw3y4");
+          kco.link("#btnCoverOrder");
+          co.forEach(order => kco.add(order));
+  
+          const mco = new window.KiteConnect("59y2dm60w17qw3y4");
+          mco.link("#btnMarketOrder");
+          bo.forEach(order => mco.add(order));
+        })
+      }
+      
+      // if (kiteMarketOrder) {
+      //   bo.forEach(order => kiteMarketOrder.add(order));
+      // }
       console.log({co, bo});
     }
-  }, [fields.tradingSymbol, fields.entryPrice, fields.stopLoss, quantity, fields.capital, fields.slPerTrade]);
+  }, [
+    fields.tradingSymbol, 
+    fields.entryPrice, 
+    fields.stopLoss, 
+    quantity, 
+    fields.capital, 
+    fields.slPerTrade,
+    kiteCoverOrder,
+    kiteMarketOrder,
+  ]);
+
+  React.useEffect(() => {
+    console.log("KiteConnect Status", window.KiteConnect)
+    if (window.KiteConnect) {
+      window.KiteConnect.ready(function() {
+        const kco = new window.KiteConnect("59y2dm60w17qw3y4");
+        kco.link("#btnCoverOrder");
+        setKiteCoverOrder(kco);
+
+        const mco = new window.KiteConnect("59y2dm60w17qw3y4");
+        mco.link("#btnMarketOrder");
+        setKiteMarketOrder(mco);
+
+
+        // kco.add({
+        //     "exchange": "NSE",
+        //     "tradingsymbol": "INFY",
+        //     "quantity": 5,
+        //     "transaction_type": "BUY",
+        //     "order_type": "MARKET"
+        // });
+        
+    
+        // // Add a stock to the basket
+        // kite.add({
+        //     "exchange": "NSE",
+        //     "tradingsymbol": "INFY",
+        //     "quantity": 5,
+        //     "transaction_type": "BUY",
+        //     "order_type": "MARKET"
+        // });
+    
+        // // Add another stock
+        // kite.add({
+        //     "exchange": "NSE",
+        //     "tradingsymbol": "SBIN",
+        //     "quantity": 1,
+        //     "order_type": "LIMIT",
+        //     "transaction_type": "SELL",
+        //     "price": 105
+        // });
+    
+        // // Add a Bracket Order
+        // kite.add({
+        //     "tradingsymbol": "RELIANCE",
+        //     "exchange": "NSE",
+        //     "transaction_type": "BUY",
+        //     "order_type": "LIMIT",
+        //     "product": "MIS",
+        //     "price": 915.15,
+        //     "quantity": 1,
+        //     "variety": "bo",
+        //     "stoploss": 5,
+        //     "squareoff": 7,
+        //     "trailing_stoploss": 1.5,
+        //     "readonly": true
+        // });
+    
+        // // Register an (optional) callback.
+        // kite.finished(function(status, request_token) {
+        //     alert("Finished. Status is " + status);
+        // });
+    
+        // // Render the in-built button inside a given target
+        // kite.renderButton("#default-button");
+    
+        // OR, link the basket to any existing element you want
+        // kite.link("#custom-button");
+      });
+    }
+  }, [window.KiteConnect])
 
   return (
     <Container className="App">
@@ -131,7 +236,7 @@ function App() {
         <Col>{quantity}</Col>
       </Row>
       <Row className="risk-container">
-        <Col className="text-center"><Badge variant="danger">{maximumLoss}</Badge></Col>
+        <Col className="text-center"><Badge variant="danger">Risk: <strong>{maximumLoss}</strong></Badge></Col>
       </Row>
       <Form onSubmit={calculateQuantity}>
         <Form.Row>
@@ -221,7 +326,7 @@ function App() {
       </Form>
 
       <br />
-      <form
+      {/* <form
         method="post"
         id="coBasket-form"
         action="https://kite.zerodha.com/connect/basket"
@@ -239,7 +344,25 @@ function App() {
         <Button size="lg" variant={buyOrSell === 'BUY' ? 'success' : 'danger'} type="submit">
           {buyOrSell} Intraday CO
         </Button>
-      </form>
+      </form> */}
+
+      <Button 
+        id="btnCoverOrder" 
+        size="lg" 
+        variant={buyOrSell === 'BUY' ? 'success' : 'danger'} 
+        type="submit"
+        onClick={onBuyIntraday}
+      >
+          {buyOrSell} Intraday CO
+      </Button>
+      <Button 
+        id="btnMarketOrder" 
+        size="lg" 
+        variant="warning" 
+        type="button"
+      >
+        Place Market Orders
+      </Button>
 
       <form
         method="post"
