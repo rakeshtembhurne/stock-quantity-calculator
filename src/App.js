@@ -139,8 +139,9 @@ function App() {
           quantity: quantity,
           transaction_type: bos,
           product: 'MIS',
-          order_type: "LIMIT",
+          order_type: "SL-M",
           price: parseFloat(fields.entryPrice),
+          trigger_price: parseFloat(fields.entryPrice),
         },
         {
           tradingsymbol: fields.tradingSymbol,
