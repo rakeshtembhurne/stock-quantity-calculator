@@ -25,7 +25,7 @@ function App() {
   const location = useLocation();
   const [quantity, setQuantity] = React.useState(0);
   const [maximumLoss, setMaximumLoss] = React.useState(0);
-  const [targetPrice, setTargetPrice] = React.useState(0);
+  const [maximumProfit, setMaximumProfit] = React.useState(0);
   const [coBasket, setCoBasket] = React.useState([]);
   const [boBasket, setBoBasket] = React.useState([]);
   const [moBasket, setMoBasket] = React.useState([]);
@@ -47,14 +47,16 @@ function App() {
     }
 
     if (fields.capital && fields.entryPrice && fields.slPerTrade && fields.stopLoss) {
+      
       const maxLoss = ((fields.capital * fields.slPerTrade) / 100);
       const stopLoss = Math.abs((fields.entryPrice - fields.stopLoss));
-      const target = fields.targetPrice ? Math.abs((fields.targetPrice - fields.entryPrice)) : 0;
       const quantity =  Math.round(maxLoss / stopLoss);
-      console.log({maxLoss, stopLoss, quantity});
+      const maxProfit = fields.targetPrice > 0 ? (fields.targetPrice - fields.entryPrice) * quantity : 0;
+      
+      console.log({maxLoss, maxProfit, stopLoss, quantity});
       setQuantity(quantity);
       setMaximumLoss(maxLoss);
-      setTargetPrice(target);
+      setMaximumProfit(maxProfit);
     }
   }
 
@@ -175,7 +177,15 @@ function App() {
         <Col>{quantity}</Col>
       </Row>
       <Row className="risk-container">
-        <Col className="text-center"><Badge variant="danger">{maximumLoss}</Badge></Col>
+        <Col className="text-center">
+          <Badge variant="danger" className="m-1 my-3">Risk: <big><strong>{maximumLoss}</strong></big></Badge>
+          {fields.targetPrice && fields.targetPrice > 0 && (
+            <>
+              <Badge variant="success" className="m-1 my-3">Reward: <big><strong>{Number(maximumProfit).toFixed(2)}</strong></big></Badge>
+              <Badge variant="warning" className="m-1 my-3">RRR: <big><strong>{Number(maximumProfit/maximumLoss).toFixed(1)}</strong></big></Badge>
+            </>
+          )}
+        </Col>
       </Row>
       <Form onSubmit={calculateQuantity}>
         <Form.Row>
