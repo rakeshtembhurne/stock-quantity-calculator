@@ -25,7 +25,7 @@ function App() {
   const location = useLocation();
   const [quantity, setQuantity] = React.useState(0);
   const [maximumLoss, setMaximumLoss] = React.useState(0);
-  const [targetPrice, setTargetPrice] = React.useState(0);
+  const [maximumProfit, setMaximumProfit] = React.useState(0);
   const [coBasket, setCoBasket] = React.useState([]);
   const [boBasket, setBoBasket] = React.useState([]);
   const [moBasket, setMoBasket] = React.useState([]);
@@ -47,14 +47,16 @@ function App() {
     }
 
     if (fields.capital && fields.entryPrice && fields.slPerTrade && fields.stopLoss) {
+      
       const maxLoss = ((fields.capital * fields.slPerTrade) / 100);
       const stopLoss = Math.abs((fields.entryPrice - fields.stopLoss));
-      const target = fields.targetPrice ? Math.abs((fields.targetPrice - fields.entryPrice)) : 0;
       const quantity =  Math.round(maxLoss / stopLoss);
-      console.log({maxLoss, stopLoss, quantity});
+      const maxProfit = fields.targetPrice > 0 ? (fields.targetPrice - fields.entryPrice) * quantity : 0;
+      
+      console.log({maxLoss, maxProfit, stopLoss, quantity});
       setQuantity(quantity);
       setMaximumLoss(maxLoss);
-      setTargetPrice(target);
+      setMaximumProfit(maxProfit);
     }
   }
 
@@ -67,6 +69,11 @@ function App() {
     localStorage.setItem('slPerTrade', fields.slPerTrade);
     localStorage.setItem('stopLoss', fields.stopLoss);
     localStorage.setItem('tradingSymbol', fields.tradingSymbol);
+  }
+
+  // TODO: Finish resetting form
+  function onResetForm(e) {
+    
   }
 
   function getTrailingSl(ltp) {
@@ -137,8 +144,9 @@ function App() {
           quantity: quantity,
           transaction_type: bos,
           product: 'MIS',
-          order_type: "LIMIT",
+          order_type: "SL-M",
           price: parseFloat(fields.entryPrice),
+          trigger_price: parseFloat(fields.entryPrice),
         },
         {
           tradingsymbol: fields.tradingSymbol,
@@ -175,7 +183,15 @@ function App() {
         <Col>{quantity}</Col>
       </Row>
       <Row className="risk-container">
-        <Col className="text-center"><Badge variant="danger">{maximumLoss}</Badge></Col>
+        <Col className="text-center">
+          <Badge variant="danger" className="m-1 my-3">Risk: <big><strong>{maximumLoss}</strong></big></Badge>
+          {fields.targetPrice && fields.targetPrice > 0 && (
+            <>
+              <Badge variant="success" className="m-1 my-3">Reward: <big><strong>{Number(maximumProfit).toFixed(2)}</strong></big></Badge>
+              <Badge variant="warning" className="m-1 my-3">RRR: <big><strong>{Number(maximumProfit/maximumLoss).toFixed(1)}</strong></big></Badge>
+            </>
+          )}
+        </Col>
       </Row>
       <Form onSubmit={calculateQuantity}>
         <Form.Row>
@@ -214,7 +230,7 @@ function App() {
           <Form.Group as={Col}>
             <Form.Label>Stop Loss</Form.Label>
             <Form.Control
-              placeholder="Capital"
+              placeholder="Stop Loss"
               size="lg"
               autoFocus
               autoComplete="off"
@@ -275,9 +291,9 @@ function App() {
           </Form.Group>
         </Form.Row>
 
-        <Button size="lg" variant="primary" type="submit">
+        {/* <Button size="lg" variant="primary" type="submit">
           Calculate Quantity
-        </Button>
+        </Button> */}
       </Form>
 
       <br />
@@ -340,6 +356,12 @@ function App() {
           {buyOrSell} Market Order
         </Button>
       </form>
+      {/* <div className="mr-3 mb-3 d-inline">
+        <Button size="lg" variant="warning" type="reset" onClick={onResetForm}>
+          Reset Form
+        </Button>
+      </div> */}
+      
     </Container>
   );
 }
