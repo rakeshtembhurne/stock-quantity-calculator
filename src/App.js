@@ -71,6 +71,11 @@ function App() {
     localStorage.setItem('tradingSymbol', fields.tradingSymbol);
   }
 
+  // TODO: Finish resetting form
+  function onResetForm(e) {
+    
+  }
+
   function getTrailingSl(ltp) {
     if (ltp < 100) {
       return 1;
@@ -225,7 +230,7 @@ function App() {
           <Form.Group as={Col}>
             <Form.Label>Stop Loss</Form.Label>
             <Form.Control
-              placeholder="Capital"
+              placeholder="Stop Loss"
               size="lg"
               autoFocus
               autoComplete="off"
@@ -286,9 +291,9 @@ function App() {
           </Form.Group>
         </Form.Row>
 
-        <Button size="lg" variant="primary" type="submit">
+        {/* <Button size="lg" variant="primary" type="submit">
           Calculate Quantity
-        </Button>
+        </Button> */}
       </Form>
 
       <br />
@@ -351,6 +356,12 @@ function App() {
           {buyOrSell} Market Order
         </Button>
       </form>
+      {/* <div className="mr-3 mb-3 d-inline">
+        <Button size="lg" variant="warning" type="reset" onClick={onResetForm}>
+          Reset Form
+        </Button>
+      </div> */}
+      
     </Container>
   );
 }
