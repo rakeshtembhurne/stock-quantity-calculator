@@ -2,17 +2,29 @@ import React from 'react';
 import ReactDOM from "react-dom";
 import {
   BrowserRouter as Router,
-  // Switch,
-  // useLocation
+  Switch,
+  Route,
+  Link
 } from "react-router-dom";
 import './index.css';
 import App from './App';
+import Cash from './Cash';
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
   <React.StrictMode>
     <Router>
-      <App />
+      <Switch>
+          <Route exact path="/">
+            <App />
+          </Route>
+          <Route path="/cash">
+            <Cash />
+          </Route>
+          {/* <Route path="/future">
+            <Future />
+          </Route> */}
+        </Switch>
     </Router>
   </React.StrictMode>,
   document.getElementById('root')
